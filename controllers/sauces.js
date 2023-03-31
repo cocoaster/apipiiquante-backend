@@ -71,7 +71,7 @@ exports.like = (req, res, next) => {
         throw new Error("Invalid like value");
       }
 
-      // Update the sauce in the database
+      // Mettre à jour la sauce dans la base de données
       Sauces.updateOne({_id: req.params.id}, sauce)
         .then(() => {
           res.status(status).json({message: message});

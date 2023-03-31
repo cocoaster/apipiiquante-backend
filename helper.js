@@ -1,8 +1,8 @@
 exports.success = (message, data) => {
   return {message, data};
 };
-exports.success = (message, data) => {
-  return {message, data};
+exports.error = (message, error) => {
+  return {message, error};
 };
 
 exports.getUniqueId = (sauces) => {
