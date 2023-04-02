@@ -1,4 +1,3 @@
-backend/images/
-backend/.env
-backend/node_modules
-backend/Procfile
+.env
+Procfile
+node_modules
