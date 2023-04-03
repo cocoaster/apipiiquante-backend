@@ -20,7 +20,9 @@ exports.like = (req, res, next) => {
         // User liked the sauce
         if (userLikedSauce) {
           // User already liked the sauce
-          message = "You have already liked this sauce";
+          sauce.likes -= 1;
+          sauce.usersLiked.splice(sauce.usersLiked.indexOf(userId), 1);
+          message = "You cancelled your like";
         } else {
           // User has not yet liked the sauce
           sauce.likes += 1;
@@ -39,7 +41,9 @@ exports.like = (req, res, next) => {
         // User disliked the sauce
         if (userDislikedSauce) {
           // User already disliked the sauce
-          message = "You have already disliked this sauce";
+          sauce.dislikes -= 1;
+          sauce.usersDisliked.splice(sauce.usersDisliked.indexOf(userId), 1);
+          message = "You cancelled your dislike";
         } else {
           // User has not yet disliked the sauce
           sauce.dislikes += 1;
@@ -71,7 +75,7 @@ exports.like = (req, res, next) => {
         throw new Error("Invalid like value");
       }
 
-      // Mettre à jour la sauce dans la base de données
+      // Update the sauce in the database
       Sauces.updateOne({_id: req.params.id}, sauce)
         .then(() => {
           res.status(status).json({message: message});
@@ -118,18 +122,25 @@ exports.modifySauce = (req, res, next) => {
     : {...req.body};
 
   delete sauceObject._userId;
+
   Sauces.findOne({_id: req.params.id})
     .then((sauce) => {
-      if (sauce.userId != req.auth.userId) {
-        res.status(401).json({message: "Not authorized"});
-      } else {
-        Sauces.updateOne(
-          {_id: req.params.id},
-          {...sauceObject, _id: req.params.id}
-        )
-          .then(() => res.status(200).json({message: "Objet modifié!"}))
-          .catch((error) => res.status(401).json({error}));
+      if (sauce.userId !== req.auth.userId) {
+        return res.status(401).json({message: "Not authorized"});
       }
+
+      // Suppression de l'ancienne image si une nouvelle image est téléchargée
+      if (req.file && sauce.imageUrl) {
+        const filename = sauce.imageUrl.split("/images/")[1];
+        fs.unlink(`images/${filename}`, () => {});
+      }
+
+      Sauces.updateOne(
+        {_id: req.params.id},
+        {...sauceObject, _id: req.params.id}
+      )
+        .then(() => res.status(200).json({message: "Sauce updated"}))
+        .catch((error) => res.status(400).json({error}));
     })
     .catch((error) => {
       res.status(400).json({error});
