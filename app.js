@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
+const cors = require("cors");
+
 const dotenv = require("dotenv");
 const saucesRoutes = require("./routes/sauces");
 const usersRoutes = require("./routes/users");
@@ -17,9 +19,15 @@ app.use(
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "http://localhost:4200"],
-      connectSrc: ["'self'", "http://localhost:3000", "ws://localhost:4200"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'"],
+      // Remplacez "http://localhost:4200" par l'URL de votre frontend
+      connectSrc: [
+        "'self'",
+        "http://localhost:3000",
+        "ws://localhost:4200",
+        "'unsafe-inline'",
+      ],
+      fontSrc: ["'self'"],
       objectSrc: ["'none'"],
       upgradeInsecureRequests: [],
       blockAllMixedContent: [],
@@ -32,6 +40,7 @@ app.use(
     browserSniff: true,
   })
 );
+
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -44,7 +53,10 @@ app.use((req, res, next) => {
   );
   next();
 });
-// app.use(cors());
+app.use(cors());
+const corsOptions = {
+  origin: "http://localhost:4200",
+};
 const userSchema = new mongoose.Schema({
   email: String,
   password: String,
