@@ -151,8 +151,6 @@ exports.deleteSauce = (req, res, next) => {
   console.log(req.params);
   Sauces.findOne({_id: req.params.id})
     .then((sauce) => {
-      console.log(sauce.userId, req.body.userId);
-
       if (sauce.userId === req.auth.userId) {
         const filename = sauce.imageUrl.split("/images/")[1];
         fs.unlink(`images/${filename}`, () => {
